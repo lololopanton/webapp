@@ -822,20 +822,30 @@ async function refreshBalance() {
 
     if (!balanceElement || !usdElement) return;
 
+    // Показываем загрузку
     balanceElement.style.opacity = '0.5';
-
-    setTimeout(() => {
-        const randomBalance = Math.floor(Math.random() * 1000);
-        balanceElement.textContent = randomBalance;
-        usdElement.textContent = `${randomBalance} USD`;
-        balanceElement.style.opacity = '1';
-
-        updateHistory();
-
-        if (typeof showNotification === 'function') {
-            showNotification('Баланс обновлен', 'success');
+    
+    try {
+        // Здесь мы будем получать реальный баланс
+        // Пока просто показываем 0, но без рандома
+        const currentBalance = 0; // Позже заменим на реальные данные
+        
+        balanceElement.textContent = currentBalance;
+        usdElement.textContent = `${currentBalance} USD`;
+        
+        // Обновляем историю
+        if (typeof updateHistory === 'function') {
+            updateHistory();
         }
-    }, 500);
+        
+    } catch (error) {
+        console.error('Ошибка при обновлении баланса:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Ошибка загрузки баланса', 'error');
+        }
+    } finally {
+        balanceElement.style.opacity = '1';
+    }
 }
 
 // ======================================
@@ -1054,17 +1064,19 @@ window.addEventListener('load', function() {
         
         // Инициализация
         createParticles();
-        refreshBalance();
-        
-        // Обновляем баланс каждые 30 секунд
-        setInterval(refreshBalance, 30000);
-        
-        // Закрытие модальных окон по клику вне их
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        };
+
+// Получаем баланс один раз при загрузке (без рандома)
+fetchBalance();
+
+// Обновляем историю
+updateHistory();
+
+// Закрытие модальных окон по клику вне их
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+};
     </script>
 </body>
 </html>
