@@ -680,6 +680,214 @@
     <div class="notification" id="notification"></div>
     
     <script>
+        // ======================================
+// ==== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ====
+// ======================================
+
+let userId = null;
+let userName = '';
+
+try {
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        
+        const user = Telegram.WebApp.initDataUnsafe?.user;
+        if (user) {
+            userId = user.id;
+            userName = user.first_name || 'Пользователь';
+            console.log('Пользователь:', userId, userName);
+            
+            const headerP = document.querySelector('.header p');
+            if (headerP) {
+                headerP.textContent = `Привет, ${userName}!`;
+            }
+        }
+        
+        Telegram.WebApp.MainButton.setText('ЗАКРЫТЬ').hide();
+    }
+} catch (e) {
+    console.log('Ошибка Telegram WebApp:', e);
+}
+
+// ======================================
+// ==== ОТПРАВКА ДАННЫХ БОТУ ============
+// ======================================
+
+function sendToBot(action, data) {
+    if (!window.Telegram || !Telegram.WebApp) {
+        alert('Ошибка: не удалось отправить данные');
+        return;
+    }
+    
+    try {
+        const message = {
+            action: action,
+            userId: userId,
+            ...data
+        };
+        
+        Telegram.WebApp.sendData(JSON.stringify(message));
+        
+        if (typeof showNotification === 'function') {
+            showNotification('Запрос отправлен!', 'success');
+        } else {
+            alert('Запрос отправлен!');
+        }
+        
+        setTimeout(() => {
+            Telegram.WebApp.close();
+        }, 1000);
+        
+    } catch (e) {
+        console.error('Ошибка отправки:', e);
+        alert('Ошибка отправки');
+    }
+}
+
+// ======================================
+// ==== ПОЛУЧЕНИЕ БАЛАНСА ===============
+// ======================================
+
+async function fetchBalance() {
+    if (!userId) {
+        console.log('Нет userId');
+        return;
+    }
+    
+    try {
+        const balanceElement = document.getElementById('balance');
+        const usdElement = document.getElementById('usdBalance');
+        
+        if (balanceElement) {
+            balanceElement.style.opacity = '0.5';
+        }
+        
+        // Здесь будет реальный запрос к боту
+        setTimeout(() => {
+            if (balanceElement) {
+                balanceElement.textContent = '100';
+                balanceElement.style.opacity = '1';
+            }
+            if (usdElement) {
+                usdElement.textContent = '$100 USD';
+            }
+        }, 500);
+        
+    } catch (error) {
+        console.error('Ошибка получения баланса:', error);
+    }
+}
+
+// ======================================
+// ==== ОБРАБОТКА ВЫВОДА ================
+// ======================================
+
+function processWithdraw() {
+    const amount = document.getElementById('withdrawAmount')?.value;
+    const address = document.getElementById('withdrawAddress')?.value;
+    
+    if (!amount || !address) {
+        alert('Заполните все поля');
+        return;
+    }
+    
+    sendToBot('withdraw', { amount: amount, address: address });
+    closeModal('withdrawModal');
+}
+
+// ======================================
+// ==== ОБРАБОТКА ОТПРАВКИ ==============
+// ======================================
+
+function processSend() {
+    const amount = document.getElementById('sendAmount')?.value;
+    const address = document.getElementById('sendAddress')?.value;
+    
+    if (!amount || !address) {
+        alert('Заполните все поля');
+        return;
+    }
+    
+    sendToBot('send', { amount: amount, address: address });
+    closeModal('sendModal');
+}
+
+// ======================================
+// ==== ОБНОВЛЕНИЕ БАЛАНСА ==============
+// ======================================
+
+async function refreshBalance() {
+    const balanceElement = document.getElementById('balance');
+    const usdElement = document.getElementById('usdBalance');
+
+    if (!balanceElement || !usdElement) return;
+
+    balanceElement.style.opacity = '0.5';
+
+    setTimeout(() => {
+        const randomBalance = Math.floor(Math.random() * 1000);
+        balanceElement.textContent = randomBalance;
+        usdElement.textContent = `${randomBalance} USD`;
+        balanceElement.style.opacity = '1';
+
+        updateHistory();
+
+        if (typeof showNotification === 'function') {
+            showNotification('Баланс обновлен', 'success');
+        }
+    }, 500);
+}
+
+// ======================================
+// ==== ОБНОВЛЕНИЕ ИСТОРИИ ==============
+// ======================================
+
+function updateHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+
+    const operations = [
+        { type: 'deposit', amount: 100, date: 'Только что', icon: '📥', title: 'Пополнение' },
+        { type: 'withdraw', amount: -50, date: '2 часа назад', icon: '📤', title: 'Вывод' },
+        { type: 'send', amount: -10, date: 'Вчера', icon: '✈️', title: 'Отправка' }
+    ];
+
+    let html = '';
+    operations.forEach((op, index) => {
+        const amountClass = op.amount > 0 ? 'positive' : 'negative';
+        const amountSign = op.amount > 0 ? '+' : '';
+        
+        html += `
+            <div class="history-item" style="animation-delay: ${0.6 + index * 0.1}s">
+                <div class="history-item-left">
+                    <div class="history-icon">${op.icon}</div>
+                    <div class="history-info">
+                        <div class="history-title">${op.title}</div>
+                        <div class="history-date">${op.date}</div>
+                    </div>
+                </div>
+                <div class="history-amount ${amountClass}">
+                    ${amountSign}${op.amount} USDT
+                </div>
+            </div>
+        `;
+    });
+    
+    historyList.innerHTML = html;
+}
+
+// ======================================
+// ==== ИНИЦИАЛИЗАЦИЯ ===================
+// ======================================
+
+window.addEventListener('load', function() {
+    if (typeof createParticles === 'function') {
+        createParticles();
+    }
+    
+    fetchBalance();
+    updateHistory();
+});
         // Создание частиц фона
         function createParticles() {
             const particlesContainer = document.getElementById('particles');
