@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crypto Bot | Web App</title>
     
-    <!-- Подключаем Telegram Web App SDK (ЭТО ВАЖНО!) -->
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        /* Стили и анимации */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
         * {
@@ -569,7 +568,7 @@
             <button class="action-button" onclick="showSendModal()">
                 <span class="emoji">✈️</span> Отправить
             </button>
-            <button class="action-button" onclick="refreshBalance()">
+            <button class="action-button" onclick="requestBalance()">
                 <span class="emoji">🔄</span> Обновить
             </button>
             <button class="action-button primary" onclick="showGame()">
@@ -642,11 +641,12 @@
         // ======================================
         let userId = null;
         let userName = '';
+        let currentBalance = 0;
         
         // Проверяем, что Telegram Web App загружен
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
-            Telegram.WebApp.expand(); // Раскрываем на весь экран
+            Telegram.WebApp.expand();
             
             const user = Telegram.WebApp.initDataUnsafe?.user;
             if (user) {
@@ -674,16 +674,6 @@
             return balance ? parseFloat(balance) : 0;
         }
         
-        // Устанавливаем баланс при загрузке
-        const initialBalance = getBalanceFromUrl();
-        const balanceElement = document.getElementById('balance');
-        const usdElement = document.getElementById('usdBalance');
-        
-        if (balanceElement) {
-            balanceElement.textContent = initialBalance;
-            usdElement.textContent = `$${initialBalance} USD`;
-        }
-        
         // ======================================
         // ==== ОТПРАВКА ДАННЫХ БОТУ ============
         // ======================================
@@ -701,10 +691,9 @@
                 };
                 
                 Telegram.WebApp.sendData(JSON.stringify(message));
+                console.log('Отправлено:', message);
                 
-                if (typeof showNotification === 'function') {
-                    showNotification('Запрос отправлен!', 'success');
-                }
+                showNotification('Запрос отправлен!', 'success');
                 
             } catch (e) {
                 console.error('Ошибка отправки:', e);
@@ -713,55 +702,55 @@
         }
         
         // ======================================
-        // ==== ФУНКЦИИ БАЛАНСА =================
+        // ==== ОБНОВЛЕНИЕ БАЛАНСА НА ЭКРАНЕ ====
         // ======================================
-        async function fetchBalance() {
+        function updateBalanceDisplay(balance) {
             const balanceElement = document.getElementById('balance');
             const usdElement = document.getElementById('usdBalance');
             
-            if (!balanceElement || !usdElement) return;
-            
-            balanceElement.style.opacity = '0.5';
-            
-            try {
-                sendToBot('get_balance', {});
-                setTimeout(() => {
-                    balanceElement.style.opacity = '1';
-                }, 500);
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
+            if (balanceElement) {
+                balanceElement.textContent = balance;
                 balanceElement.style.opacity = '1';
             }
+            if (usdElement) {
+                usdElement.textContent = `$${balance} USD`;
+            }
+            currentBalance = balance;
         }
         
-        async function refreshBalance() {
+        // ======================================
+        // ==== ЗАПРОС БАЛАНСА У БОТА ===========
+        // ======================================
+        function requestBalance() {
             const balanceElement = document.getElementById('balance');
-            const usdElement = document.getElementById('usdBalance');
-            
-            if (!balanceElement || !usdElement) return;
-            
-            balanceElement.style.opacity = '0.5';
-            
-            try {
-                sendToBot('get_balance', {});
-                
-                setTimeout(() => {
-                    balanceElement.style.opacity = '1';
-                    
-                    if (typeof updateHistory === 'function') {
-                        updateHistory();
-                    }
-                    
-                    if (typeof showNotification === 'function') {
-                        showNotification('Запрос отправлен', 'success');
-                    }
-                }, 500);
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                balanceElement.style.opacity = '1';
+            if (balanceElement) {
+                balanceElement.style.opacity = '0.5';
             }
+            
+            sendToBot('get_balance', {});
+            
+            // Ждём 2 секунды и возвращаем прозрачность
+            setTimeout(() => {
+                if (balanceElement) {
+                    balanceElement.style.opacity = '1';
+                }
+            }, 2000);
+        }
+        
+        // ======================================
+        // ==== СЛУШАЕМ СООБЩЕНИЯ ОТ БОТА =======
+        // ======================================
+        // Telegram Web App может получать сообщения?
+        // К сожалению, прямой связи нет.
+        // Бот отвечает в чат, а Web App не видит ответа.
+        
+        // Поэтому мы используем баланс из URL при открытии
+        const urlBalance = getBalanceFromUrl();
+        if (urlBalance > 0) {
+            updateBalanceDisplay(urlBalance);
+        } else {
+            // Если в URL нет баланса, запрашиваем у бота
+            requestBalance();
         }
         
         // ======================================
