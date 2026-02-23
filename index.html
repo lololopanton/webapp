@@ -1,47 +1,1082 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>Crypto Bot</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crypto Bot | Web App</title>
+    <style>
+        /* Стили и анимации */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Анимированный фон с частицами */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-30px) translateX(-10px); }
+            75% { transform: translateY(-10px) translateX(20px); }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Анимированный заголовок */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #ffd700, #ffb347);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 20px 40px rgba(255, 215, 0, 0.6); }
+            100% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
+        }
+        
+        .logo span {
+            font-size: 40px;
+        }
+        
+        .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(145deg, #fff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 5px;
+         }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        /* Карточка баланса с анимацией */
+        .balance-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.6s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+        }
+        
+        .balance-amount {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 5px;
+            animation: countUp 1s ease-out;
+        }
+        
+        @keyframes countUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .balance-usd {
+            font-size: 16px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+        
+        /* Сетка кнопок */
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .action-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+        
+        .action-button:nth-child(1) { animation-delay: 0.1s; }
+        .action-button:nth-child(2) { animation-delay: 0.2s; }
+        .action-button:nth-child(3) { animation-delay: 0.3s; }
+        .action-button:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .action-button:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ffd700;
+        }
+        
+        .action-button:active {
+            transform: translateY(0);
+        }
+        
+        .action-button .emoji {
+            font-size: 32px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .action-button.primary {
+            background: linear-gradient(145deg, #ffd700, #ffb347);
+            color: #333;
+            grid-column: span 2;
+        }
+        
+        .action-button.primary .emoji {
+            animation: none;
+        }
+        
+        /* История операций */
+        .history-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            animation: slideUp 0.8s ease-out 0.5s both;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .history-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .history-header span {
+            color: #ffd700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            animation: fadeInRight 0.5s ease-out backwards;
+            transition: transform 0.2s;
+        }
+        
+        .history-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-item:nth-child(1) { animation-delay: 0.6s; }
+        .history-item:nth-child(2) { animation-delay: 0.7s; }
+        .history-item:nth-child(3) { animation-delay: 0.8s; }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .history-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .history-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .history-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .history-amount {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .history-amount.positive {
+            color: #4caf50;
+        }
+        
+        .history-amount.negative {
+            color: #f44336;
+        }
+        
+        /* Нижняя панель */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            z-index: 10;
+            animation: slideUpNav 0.5s ease-out;
+        }
+        
+        @keyframes slideUpNav {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #ffd700;
+        }
+        
+        .nav-item .nav-icon {
+            font-size: 24px;
+        }
+        
+        .nav-item:hover {
+            color: white;
+        }
+        
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            border-radius: 30px;
+            padding: 25px;
+            width: 90%;
+            max-width: 350px;
+            position: relative;
+            animation: slideInModal 0.3s;
+        }
+        
+        @keyframes slideInModal {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: white;
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .modal-input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .modal-input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+        
+        .modal-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #ffd700, #ffb347);
+            border: none;
+            border-radius: 15px;
+            color: #333;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .modal-button:active {
+            transform: scale(0.98);
+        }
+        
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: slideDownNotif 0.3s, fadeOut 0.3s 2.7s;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        @keyframes slideDownNotif {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -100%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Адаптация */
+        @media (max-width: 400px) {
+            .balance-amount {
+                font-size: 42px;
+            }
+            
+            .action-button {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-<h2>Crypto Bot (TEST)</h2>
-<p id="info">Открыто в браузере</p>
+    <!-- Анимированные частицы фона -->
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <!-- Шапка с лого -->
+        <div class="header">
+            <div class="logo">
+                <span>💰</span>
+            </div>
+            <h1>Crypto Bot</h1>
+            <p>Ваш надежный крипто-кошелек</p>
+        </div>
+        
+        <!-- Карточка баланса -->
+        <div class="balance-card">
+            <div class="balance-label">Баланс</div>
+            <div class="balance-amount" id="balance">0</div>
+            <div class="balance-usd" id="usdBalance">$0 USD</div>
+        </div>
+        
+        <!-- Сетка кнопок -->
+        <div class="buttons-grid">
+            <button class="action-button" onclick="showDepositModal()">
+                <span class="emoji">📥</span>
+                Пополнить
+            </button>
+            <button class="action-button" onclick="showWithdrawModal()">
+                <span class="emoji">📤</span>
+                Вывести
+            </button>
+            <button class="action-button" onclick="showSendModal()">
+                <span class="emoji">✈️</span>
+                Отправить
+            </button>
+            <button class="action-button" onclick="refreshBalance()">
+                <span class="emoji">🔄</span>
+                Обновить
+            </button>
+            <button class="action-button primary" onclick="showGame()">
+                <span class="emoji">🎮</span>
+                Играть и зарабатывать
+            </button>
+        </div>
+        
+        <!-- История операций -->
+        <div class="history-section">
+            <div class="history-header">
+                <h3>📋 История операций</h3>
+                <span onclick="showAllHistory()">Все →</span>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- История будет загружаться сюда -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Нижняя навигация -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="navigate('home')">
+            <span class="nav-icon">🏠</span>
+            <span>Главная</span>
+        </div>
+        <div class="nav-item" onclick="navigate('stats')">
+            <span class="nav-icon">📊</span>
+            <span>Статистика</span>
+        </div>
+        <div class="nav-item" onclick="navigate('referrals')">
+            <span class="nav-icon">👥</span>
+            <span>Рефералы</span>
+        </div>
+        <div class="nav-item" onclick="navigate('profile')">
+            <span class="nav-icon">👤</span>
+            <span>Профиль</span>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для пополнения -->
+    <div class="modal" id="depositModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('depositModal')">&times;</span>
+            <h2>📥 Пополнение</h2>
+            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">Адрес для пополнения:</p>
+            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px; word-break: break-all;">
+                <code>TTestAddress123456789</code>
+            </div>
+            <p style="font-size: 14px; color: rgba(255,255,255,0.5);">После отправки нажмите "Проверить" в боте</p>
+            <button class="modal-button" onclick="copyAddress()">📋 Копировать адрес</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для вывода -->
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('withdrawModal')">&times;</span>
+            <h2>📤 Вывод средств</h2>
+            <input type="number" class="modal-input" id="withdrawAmount" placeholder="Сумма в USDT">
+            <input type="text" class="modal-input" id="withdrawAddress" placeholder="Адрес кошелька">
+            <button class="modal-button" onclick="processWithdraw()">Вывести</button>
+        </div>
+    </div>
+    
+    <!-- Модальное окно для отправки -->
+    <div class="modal" id="sendModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('sendModal')">&times;</span>
+            <h2>✈️ Отправить</h2>
+            <input type="number" class="modal-input" id="sendAmount" placeholder="Сумма в USDT">
+            <input type="text" class="modal-input" id="sendAddress" placeholder="Адрес получателя">
+            <button class="modal-button" onclick="processSend()">Отправить</button>
+        </div>
+    </div>
+    
+    <!-- Уведомления -->
+    <div class="notification" id="notification"></div>
+    
+    <script>
+        // ======================================
+// ==== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ====
+// ======================================
 
-<input id="amount" type="number" placeholder="Сумма">
-<button onclick="deposit()">Пополнить (TEST)</button>
-<button onclick="withdraw()">Вывести</button>
-
-<script>
-let tg = window.Telegram?.WebApp;
 let userId = null;
+let userName = '';
 
-if (tg) {
-  tg.ready();
-  userId = tg.initDataUnsafe.user.id;
-  document.getElementById("info").innerText = "Telegram user: " + userId;
+try {
+    if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.ready();
+        
+        const user = Telegram.WebApp.initDataUnsafe?.user;
+        if (user) {
+            userId = user.id;
+            userName = user.first_name || 'Пользователь';
+            console.log('Пользователь:', userId, userName);
+            
+            const headerP = document.querySelector('.header p');
+            if (headerP) {
+                headerP.textContent = `Привет, ${userName}!`;
+            }
+        }
+        
+        Telegram.WebApp.MainButton.setText('ЗАКРЫТЬ').hide();
+    }
+} catch (e) {
+    console.log('Ошибка Telegram WebApp:', e);
 }
 
-function send(action, data) {
-  if (!tg) {
-    alert("Открой через Telegram");
-    return;
-  }
-  tg.sendData(JSON.stringify({
-    action: action,
-    user_id: userId,
-    ...data
-  }));
-  tg.close();
+// ======================================
+// ==== ОТПРАВКА ДАННЫХ БОТУ ============
+// ======================================
+
+function sendToBot(action, data) {
+    if (!window.Telegram || !Telegram.WebApp) {
+        alert('Ошибка: не удалось отправить данные');
+        return;
+    }
+    
+    try {
+        const message = {
+            action: action,
+            userId: userId,
+            ...data
+        };
+        
+        Telegram.WebApp.sendData(JSON.stringify(message));
+        
+        if (typeof showNotification === 'function') {
+            showNotification('Запрос отправлен!', 'success');
+        } else {
+            alert('Запрос отправлен!');
+        }
+        
+        setTimeout(() => {
+            Telegram.WebApp.close();
+        }, 1000);
+        
+    } catch (e) {
+        console.error('Ошибка отправки:', e);
+        alert('Ошибка отправки');
+    }
 }
 
-function deposit() {
-  send("deposit", { amount: Number(amount.value) });
+// ======================================
+// ==== ПОЛУЧЕНИЕ БАЛАНСА ===============
+// ======================================
+
+async function fetchBalance() {
+    if (!userId) {
+        console.log('Нет userId');
+        return;
+    }
+    
+    try {
+        const balanceElement = document.getElementById('balance');
+        const usdElement = document.getElementById('usdBalance');
+        
+        if (balanceElement) {
+            balanceElement.style.opacity = '0.5';
+        }
+        
+        // Здесь будет реальный запрос к боту
+        setTimeout(() => {
+            if (balanceElement) {
+                balanceElement.textContent = '100';
+                balanceElement.style.opacity = '1';
+            }
+            if (usdElement) {
+                usdElement.textContent = '$100 USD';
+            }
+        }, 500);
+        
+    } catch (error) {
+        console.error('Ошибка получения баланса:', error);
+    }
 }
 
-function withdraw() {
-  send("withdraw", { amount: Number(amount.value) });
+// ======================================
+// ==== ОБРАБОТКА ВЫВОДА ================
+// ======================================
+
+function processWithdraw() {
+    const amount = document.getElementById('withdrawAmount')?.value;
+    const address = document.getElementById('withdrawAddress')?.value;
+    
+    if (!amount || !address) {
+        alert('Заполните все поля');
+        return;
+    }
+    
+    sendToBot('withdraw', { amount: amount, address: address });
+    closeModal('withdrawModal');
 }
-</script>
+
+// ======================================
+// ==== ОБРАБОТКА ОТПРАВКИ ==============
+// ======================================
+
+function processSend() {
+    const amount = document.getElementById('sendAmount')?.value;
+    const address = document.getElementById('sendAddress')?.value;
+    
+    if (!amount || !address) {
+        alert('Заполните все поля');
+        return;
+    }
+    
+    sendToBot('send', { amount: amount, address: address });
+    closeModal('sendModal');
+}
+
+// ======================================
+// ==== ОБНОВЛЕНИЕ БАЛАНСА ==============
+// ======================================
+
+async function refreshBalance() {
+    const balanceElement = document.getElementById('balance');
+    const usdElement = document.getElementById('usdBalance');
+
+    if (!balanceElement || !usdElement) return;
+
+    // Показываем загрузку
+    balanceElement.style.opacity = '0.5';
+    
+    try {
+        // Здесь мы будем получать реальный баланс
+        // Пока просто показываем 0, но без рандома
+        const currentBalance = 0; // Позже заменим на реальные данные
+        
+        balanceElement.textContent = currentBalance;
+        usdElement.textContent = `${currentBalance} USD`;
+        
+        // Обновляем историю
+        if (typeof updateHistory === 'function') {
+            updateHistory();
+        }
+        
+    } catch (error) {
+        console.error('Ошибка при обновлении баланса:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Ошибка загрузки баланса', 'error');
+        }
+    } finally {
+        balanceElement.style.opacity = '1';
+    }
+}
+
+// ======================================
+// ==== ОБНОВЛЕНИЕ ИСТОРИИ ==============
+// ======================================
+
+function updateHistory() {
+    const historyList = document.getElementById('historyList');
+    if (!historyList) return;
+
+    const operations = [
+        { type: 'deposit', amount: 100, date: 'Только что', icon: '📥', title: 'Пополнение' },
+        { type: 'withdraw', amount: -50, date: '2 часа назад', icon: '📤', title: 'Вывод' },
+        { type: 'send', amount: -10, date: 'Вчера', icon: '✈️', title: 'Отправка' }
+    ];
+
+    let html = '';
+    operations.forEach((op, index) => {
+        const amountClass = op.amount > 0 ? 'positive' : 'negative';
+        const amountSign = op.amount > 0 ? '+' : '';
+        
+        html += `
+            <div class="history-item" style="animation-delay: ${0.6 + index * 0.1}s">
+                <div class="history-item-left">
+                    <div class="history-icon">${op.icon}</div>
+                    <div class="history-info">
+                        <div class="history-title">${op.title}</div>
+                        <div class="history-date">${op.date}</div>
+                    </div>
+                </div>
+                <div class="history-amount ${amountClass}">
+                    ${amountSign}${op.amount} USDT
+                </div>
+            </div>
+        `;
+    });
+    
+    historyList.innerHTML = html;
+}
+
+// ======================================
+// ==== ИНИЦИАЛИЗАЦИЯ ===================
+// ======================================
+
+window.addEventListener('load', function() {
+    if (typeof createParticles === 'function') {
+        createParticles();
+    }
+    
+    fetchBalance();
+    updateHistory();
+});
+        // Создание частиц фона
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 10 + 5;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Функция показа уведомления
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.opacity = '1';
+            notification.style.backgroundColor = type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+            }, 3000);
+        }
+        
+        // Обновление баланса
+        async function refreshBalance() {
+            const balanceElement = document.getElementById('balance');
+            const usdElement = document.getElementById('usdBalance');
+            
+            // Анимация загрузки
+            balanceElement.style.opacity = '0.5';
+            
+            // Имитация запроса к боту
+            setTimeout(() => {
+                const randomBalance = Math.floor(Math.random() * 1000);
+                balanceElement.textContent = randomBalance;
+                usdElement.textContent = `$${randomBalance} USD`;
+                balanceElement.style.opacity = '1';
+                
+                // Обновляем историю
+                updateHistory();
+                
+                showNotification('Баланс обновлен', 'success');
+            }, 500);
+        }
+        
+        // Обновление истории
+        function updateHistory() {
+            const historyList = document.getElementById('historyList');
+            
+            const operations = [
+                { type: 'deposit', amount: 100, date: 'Только что', icon: '📥', title: 'Пополнение' },
+                { type: 'withdraw', amount: -50, date: '2 часа назад', icon: '📤', title: 'Вывод' },
+                { type: 'send', amount: -10, date: 'Вчера', icon: '✈️', title: 'Отправка' }
+            ];
+            
+            historyList.innerHTML = operations.map((op, index) => `
+                <div class="history-item" style="animation-delay: ${0.6 + index * 0.1}s">
+                    <div class="history-item-left">
+                        <div class="history-icon">${op.icon}</div>
+                        <div class="history-info">
+                            <div class="history-title">${op.title}</div>
+                            <div class="history-date">${op.date}</div>
+                        </div>
+                    </div>
+                    <div class="history-amount ${op.amount > 0 ? 'positive' : 'negative'}">
+                        ${op.amount > 0 ? '+' : ''}${op.amount} USDT
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Модальные окна
+        function showDepositModal() {
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+        
+        function showWithdrawModal() {
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+        
+        function showSendModal() {
+            document.getElementById('sendModal').style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Копирование адреса
+        function copyAddress() {
+            const address = 'TTestAddress123456789';
+            navigator.clipboard.writeText(address);
+            showNotification('Адрес скопирован!', 'success');
+        }
+        
+        // Обработка вывода
+        function processWithdraw() {
+            const amount = document.getElementById('withdrawAmount').value;
+            const address = document.getElementById('withdrawAddress').value;
+            
+            if (!amount || !address) {
+                showNotification('Заполните все поля');
+                return;
+            }
+            
+            closeModal('withdrawModal');
+            showNotification(`Запрос на вывод ${amount} USDT отправлен`, 'success');
+            
+            // Очищаем поля
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAddress').value = '';
+        }
+        
+        // Обработка отправки
+        function processSend() {
+            const amount = document.getElementById('sendAmount').value;
+            const address = document.getElementById('sendAddress').value;
+            
+            if (!amount || !address) {
+                showNotification('Заполните все поля');
+                return;
+            }
+            
+            closeModal('sendModal');
+            showNotification(`Отправлено ${amount} USDT`, 'success');
+            
+            // Очищаем поля
+            document.getElementById('sendAmount').value = '';
+            document.getElementById('sendAddress').value = '';
+        }
+        
+        // Игра (заглушка)
+        function showGame() {
+            showNotification('🎮 Игры скоро появятся!', 'info');
+        }
+        
+        // Навигация
+        function navigate(page) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            
+            event.target.closest('.nav-item').classList.add('active');
+            
+            const messages = {
+                home: '🏠 Главная',
+                stats: '📊 Статистика скоро',
+                referrals: '👥 Реферальная система скоро',
+                profile: '👤 Профиль скоро'
+            };
+            
+            showNotification(messages[page], 'info');
+        }
+        
+        // Показать всю историю
+        function showAllHistory() {
+            showNotification('📋 Вся история в разработке', 'info');
+        }
+        
+        // Инициализация
+        createParticles();
+
+// Получаем баланс один раз при загрузке (без рандома)
+fetchBalance();
+
+// Обновляем историю
+updateHistory();
+
+// Закрытие модальных окон по клику вне их
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+};
+    </script>
 </body>
 </html>
