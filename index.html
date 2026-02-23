@@ -699,99 +699,93 @@
         }
 
         // ======================================
-        // ==== ОТПРАВКА ДАННЫХ БОТУ ============
-        // ======================================
+// ==== ОТПРАВКА ДАННЫХ БОТУ ============
+// ======================================
 
-        function sendToBot(action, data) {
-            if (!window.Telegram || !Telegram.WebApp) {
-                alert('Ошибка: не удалось отправить данные');
-                return;
-            }
-            
-            try {
-                const message = {
-                    action: action,
-                    userId: userId,
-                    ...data
-                };
-                
-                Telegram.WebApp.sendData(JSON.stringify(message));
-                
-                if (typeof showNotification === 'function') {
-                    showNotification('Запрос отправлен!', 'success');
-                } else {
-                    alert('Запрос отправлен!');
-                }
-                
-                setTimeout(() => {
-                    Telegram.WebApp.close();
-                }, 1000);
-                
-            } catch (e) {
-                console.error('Ошибка отправки:', e);
-                alert('Ошибка отправки');
-            }
+function sendToBot(action, data) {
+    if (!window.Telegram || !Telegram.WebApp) {
+        alert('Ошибка: не удалось отправить данные');
+        return;
+    }
+    
+    try {
+        const message = {
+            action: action,
+            userId: userId,
+            ...data
+        };
+        
+        // Отправляем данные
+        Telegram.WebApp.sendData(JSON.stringify(message));
+        
+        if (typeof showNotification === 'function') {
+            showNotification('Запрос отправлен!', 'success');
+        } else {
+            alert('Запрос отправлен!');
         }
+        
+        // НЕ закрываем сразу, чтобы получить ответ
+        // setTimeout(() => {
+        //     Telegram.WebApp.close();
+        // }, 1000);
+        
+    } catch (e) {
+        console.error('Ошибка отправки:', e);
+        alert('Ошибка отправки');
+    }
+}
 
         // ======================================
-        // ==== ПОЛУЧЕНИЕ БАЛАНСА ===============
-        // ======================================
+// ==== ПОЛУЧЕНИЕ БАЛАНСА ===============
+// ======================================
 
-        async function fetchBalance() {
-            const balanceElement = document.getElementById('balance');
-            const usdElement = document.getElementById('usdBalance');
-            
-            if (!balanceElement || !usdElement) return;
-            
-            balanceElement.style.opacity = '0.5';
-            
-            try {
-                // Здесь будет реальный запрос к боту
-                setTimeout(() => {
-                    balanceElement.textContent = '0';
-                    usdElement.textContent = '$0 USD';
-                    balanceElement.style.opacity = '1';
-                }, 500);
-                
-            } catch (error) {
-                console.error('Ошибка получения баланса:', error);
-                balanceElement.style.opacity = '1';
-            }
+async function fetchBalance() {
+    const balanceElement = document.getElementById('balance');
+    const usdElement = document.getElementById('usdBalance');
+    
+    if (!balanceElement || !usdElement) return;
+    
+    balanceElement.style.opacity = '0.5';
+    
+    try {
+        // Отправляем запрос боту
+        sendToBot('get_balance', {});
+        
+        // Здесь мы не можем сразу получить ответ,
+        // поэтому баланс обновится, когда бот ответит
+        // Пока оставляем старый баланс
+        
+    } catch (error) {
+        console.error('Ошибка получения баланса:', error);
+        balanceElement.style.opacity = '1';
+    }
+}
+
+// ======================================
+// ==== ОБНОВЛЕНИЕ БАЛАНСА ==============
+// ======================================
+
+async function refreshBalance() {
+    const balanceElement = document.getElementById('balance');
+    const usdElement = document.getElementById('usdBalance');
+
+    if (!balanceElement || !usdElement) return;
+
+    balanceElement.style.opacity = '0.5';
+    
+    try {
+        // Отправляем запрос боту
+        sendToBot('get_balance', {});
+        
+        if (typeof updateHistory === 'function') {
+            updateHistory();
         }
-
-        // ======================================
-        // ==== ОБНОВЛЕНИЕ БАЛАНСА ==============
-        // ======================================
-
-        async function refreshBalance() {
-            const balanceElement = document.getElementById('balance');
-            const usdElement = document.getElementById('usdBalance');
-
-            if (!balanceElement || !usdElement) return;
-
-            balanceElement.style.opacity = '0.5';
-            
-            try {
-                // Здесь будет реальный запрос к боту
-                setTimeout(() => {
-                    balanceElement.textContent = '0';
-                    usdElement.textContent = '0 USD';
-                    balanceElement.style.opacity = '1';
-                    
-                    if (typeof updateHistory === 'function') {
-                        updateHistory();
-                    }
-                    
-                    if (typeof showNotification === 'function') {
-                        showNotification('Баланс обновлен', 'success');
-                    }
-                }, 500);
-                
-            } catch (error) {
-                console.error('Ошибка:', error);
-                balanceElement.style.opacity = '1';
-            }
-        }
+        
+    } catch (error) {
+        console.error('Ошибка:', error);
+        balanceElement.style.opacity = '1';
+    }
+}
 
         // ======================================
         // ==== ОБНОВЛЕНИЕ ИСТОРИИ ==============
@@ -989,6 +983,14 @@
                 event.target.style.display = 'none';
             }
         };
+        // ======================================
+        // ==== СЛУШАЕМ СООБЩЕНИЯ ОТ БОТА =======
+        // ======================================
+
+        // Telegram Web App может получать сообщения от бота
+        // Но для этого нужно настроить WebHook или использовать polling
+        // Пока добавим заглушку
+         console.log('Ожидание сообщений от бота...');
     </script>
 </body>
 </html>
