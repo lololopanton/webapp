@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crypto Bot | Web App</title>
+    
+    <!-- Подключаем Telegram Web App SDK (ЭТО ВАЖНО!) -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <style>
         /* Стили и анимации */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -23,7 +27,6 @@
             overflow-x: hidden;
         }
         
-        /* Анимированный фон с частицами */
         .particles {
             position: fixed;
             top: 0;
@@ -57,7 +60,6 @@
             padding-bottom: 80px;
         }
         
-        /* Анимированный заголовок */
         .header {
             text-align: center;
             margin-bottom: 30px;
@@ -112,7 +114,6 @@
             font-size: 14px;
         }
         
-        /* Карточка баланса с анимацией */
         .balance-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -176,7 +177,6 @@
             font-weight: 600;
         }
         
-        /* Сетка кнопок */
         .buttons-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -248,7 +248,6 @@
             animation: none;
         }
         
-        /* История операций */
         .history-section {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -369,7 +368,6 @@
             color: #f44336;
         }
         
-        /* Нижняя панель */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -413,7 +411,6 @@
             color: white;
         }
         
-        /* Модальное окно */
         .modal {
             display: none;
             position: fixed;
@@ -507,7 +504,6 @@
             transform: scale(0.98);
         }
         
-        /* Уведомления */
         .notification {
             position: fixed;
             top: 20px;
@@ -535,12 +531,10 @@
             }
         }
         
-        /* Адаптация */
         @media (max-width: 400px) {
             .balance-amount {
                 font-size: 42px;
             }
-            
             .action-button {
                 padding: 15px;
             }
@@ -548,11 +542,9 @@
     </style>
 </head>
 <body>
-    <!-- Анимированные частицы фона -->
     <div class="particles" id="particles"></div>
     
     <div class="container">
-        <!-- Шапка с лого -->
         <div class="header">
             <div class="logo">
                 <span>💰</span>
@@ -561,38 +553,30 @@
             <p>Ваш надежный крипто-кошелек</p>
         </div>
         
-        <!-- Карточка баланса -->
         <div class="balance-card">
             <div class="balance-label">Баланс</div>
             <div class="balance-amount" id="balance">0</div>
             <div class="balance-usd" id="usdBalance">$0 USD</div>
         </div>
         
-        <!-- Сетка кнопок -->
         <div class="buttons-grid">
             <button class="action-button" onclick="showDepositModal()">
-                <span class="emoji">📥</span>
-                Пополнить
+                <span class="emoji">📥</span> Пополнить
             </button>
             <button class="action-button" onclick="showWithdrawModal()">
-                <span class="emoji">📤</span>
-                Вывести
+                <span class="emoji">📤</span> Вывести
             </button>
             <button class="action-button" onclick="showSendModal()">
-                <span class="emoji">✈️</span>
-                Отправить
+                <span class="emoji">✈️</span> Отправить
             </button>
             <button class="action-button" onclick="refreshBalance()">
-                <span class="emoji">🔄</span>
-                Обновить
+                <span class="emoji">🔄</span> Обновить
             </button>
             <button class="action-button primary" onclick="showGame()">
-                <span class="emoji">🎮</span>
-                Играть и зарабатывать
+                <span class="emoji">🎮</span> Играть и зарабатывать
             </button>
         </div>
         
-        <!-- История операций -->
         <div class="history-section">
             <div class="history-header">
                 <h3>📋 История операций</h3>
@@ -602,27 +586,21 @@
         </div>
     </div>
     
-    <!-- Нижняя навигация -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="navigate('home')">
-            <span class="nav-icon">🏠</span>
-            <span>Главная</span>
+            <span class="nav-icon">🏠</span> Главная
         </div>
         <div class="nav-item" onclick="navigate('stats')">
-            <span class="nav-icon">📊</span>
-            <span>Статистика</span>
+            <span class="nav-icon">📊</span> Статистика
         </div>
         <div class="nav-item" onclick="navigate('referrals')">
-            <span class="nav-icon">👥</span>
-            <span>Рефералы</span>
+            <span class="nav-icon">👥</span> Рефералы
         </div>
         <div class="nav-item" onclick="navigate('profile')">
-            <span class="nav-icon">👤</span>
-            <span>Профиль</span>
+            <span class="nav-icon">👤</span> Профиль
         </div>
     </div>
     
-    <!-- Модальные окна -->
     <div class="modal" id="depositModal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('depositModal')">&times;</span>
@@ -656,38 +634,37 @@
         </div>
     </div>
     
-    <!-- Уведомления -->
     <div class="notification" id="notification"></div>
     
     <script>
         // ======================================
-        // ==== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ====
+        // ==== ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP ==
         // ======================================
         let userId = null;
         let userName = '';
-
-        try {
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.ready();
+        
+        // Проверяем, что Telegram Web App загружен
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand(); // Раскрываем на весь экран
+            
+            const user = Telegram.WebApp.initDataUnsafe?.user;
+            if (user) {
+                userId = user.id;
+                userName = user.first_name || 'Пользователь';
+                console.log('Пользователь:', userId, userName);
                 
-                const user = Telegram.WebApp.initDataUnsafe?.user;
-                if (user) {
-                    userId = user.id;
-                    userName = user.first_name || 'Пользователь';
-                    console.log('Пользователь:', userId, userName);
-                    
-                    const headerP = document.querySelector('.header p');
-                    if (headerP) {
-                        headerP.textContent = `Привет, ${userName}!`;
-                    }
+                const headerP = document.querySelector('.header p');
+                if (headerP) {
+                    headerP.textContent = `Привет, ${userName}!`;
                 }
-                
-                Telegram.WebApp.MainButton.setText('ЗАКРЫТЬ').hide();
             }
-        } catch (e) {
-            console.log('Ошибка Telegram WebApp:', e);
+            
+            Telegram.WebApp.MainButton.setText('ЗАКРЫТЬ').hide();
+        } else {
+            console.warn('Telegram Web App не доступен');
         }
-
+        
         // ======================================
         // ==== ПОЛУЧЕНИЕ БАЛАНСА ИЗ URL ========
         // ======================================
@@ -696,23 +673,23 @@
             const balance = urlParams.get('balance');
             return balance ? parseFloat(balance) : 0;
         }
-
+        
         // Устанавливаем баланс при загрузке
         const initialBalance = getBalanceFromUrl();
         const balanceElement = document.getElementById('balance');
         const usdElement = document.getElementById('usdBalance');
-
+        
         if (balanceElement) {
             balanceElement.textContent = initialBalance;
             usdElement.textContent = `$${initialBalance} USD`;
         }
-
+        
         // ======================================
         // ==== ОТПРАВКА ДАННЫХ БОТУ ============
         // ======================================
         function sendToBot(action, data) {
             if (!window.Telegram || !Telegram.WebApp) {
-                alert('Ошибка: не удалось отправить данные');
+                alert('Ошибка: Telegram Web App не доступен');
                 return;
             }
             
@@ -734,7 +711,7 @@
                 alert('Ошибка отправки');
             }
         }
-
+        
         // ======================================
         // ==== ФУНКЦИИ БАЛАНСА =================
         // ======================================
@@ -757,13 +734,13 @@
                 balanceElement.style.opacity = '1';
             }
         }
-
+        
         async function refreshBalance() {
             const balanceElement = document.getElementById('balance');
             const usdElement = document.getElementById('usdBalance');
-
+            
             if (!balanceElement || !usdElement) return;
-
+            
             balanceElement.style.opacity = '0.5';
             
             try {
@@ -786,20 +763,20 @@
                 balanceElement.style.opacity = '1';
             }
         }
-
+        
         // ======================================
         // ==== ОБНОВЛЕНИЕ ИСТОРИИ ==============
         // ======================================
         function updateHistory() {
             const historyList = document.getElementById('historyList');
             if (!historyList) return;
-
+            
             const operations = [
                 { type: 'deposit', amount: 100, date: 'Только что', icon: '📥', title: 'Пополнение' },
                 { type: 'withdraw', amount: -50, date: '2 часа назад', icon: '📤', title: 'Вывод' },
                 { type: 'send', amount: -10, date: 'Вчера', icon: '✈️', title: 'Отправка' }
             ];
-
+            
             let html = '';
             operations.forEach((op, index) => {
                 const amountClass = op.amount > 0 ? 'positive' : 'negative';
@@ -823,7 +800,7 @@
             
             historyList.innerHTML = html;
         }
-
+        
         // ======================================
         // ==== ЧАСТИЦЫ ФОНА ====================
         // ======================================
@@ -844,7 +821,7 @@
                 particlesContainer.appendChild(particle);
             }
         }
-
+        
         // ======================================
         // ==== УВЕДОМЛЕНИЯ =====================
         // ======================================
@@ -860,35 +837,38 @@
                 notification.style.opacity = '0';
             }, 3000);
         }
-
+        
         // ======================================
         // ==== МОДАЛЬНЫЕ ОКНА ==================
         // ======================================
         function showDepositModal() {
             document.getElementById('depositModal').style.display = 'flex';
         }
-
+        
         function showWithdrawModal() {
             document.getElementById('withdrawModal').style.display = 'flex';
         }
-
+        
         function showSendModal() {
             document.getElementById('sendModal').style.display = 'flex';
         }
-
+        
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
-
+        
         // ======================================
         // ==== КОПИРОВАНИЕ АДРЕСА ==============
         // ======================================
         function copyAddress() {
             const address = 'TTestAddress123456789';
-            navigator.clipboard.writeText(address);
-            showNotification('Адрес скопирован!', 'success');
+            navigator.clipboard.writeText(address).then(() => {
+                showNotification('Адрес скопирован!', 'success');
+            }).catch(() => {
+                showNotification('Ошибка копирования', 'error');
+            });
         }
-
+        
         // ======================================
         // ==== ОБРАБОТКА ВЫВОДА ================
         // ======================================
@@ -907,7 +887,7 @@
             document.getElementById('withdrawAmount').value = '';
             document.getElementById('withdrawAddress').value = '';
         }
-
+        
         // ======================================
         // ==== ОБРАБОТКА ОТПРАВКИ ==============
         // ======================================
@@ -926,14 +906,14 @@
             document.getElementById('sendAmount').value = '';
             document.getElementById('sendAddress').value = '';
         }
-
+        
         // ======================================
         // ==== ИГРА (ЗАГЛУШКА) =================
         // ======================================
         function showGame() {
             showNotification('🎮 Игры скоро появятся!', 'info');
         }
-
+        
         // ======================================
         // ==== НАВИГАЦИЯ =======================
         // ======================================
@@ -952,20 +932,20 @@
             
             showNotification(messages[page], 'info');
         }
-
+        
         // ======================================
         // ==== ВСЯ ИСТОРИЯ =====================
         // ======================================
         function showAllHistory() {
             showNotification('📋 Вся история в разработке', 'info');
         }
-
+        
         // ======================================
         // ==== ИНИЦИАЛИЗАЦИЯ ===================
         // ======================================
         createParticles();
         updateHistory();
-
+        
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
