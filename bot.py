@@ -1,7 +1,7 @@
 import telebot
 import sqlite3
 import time
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, MenuButtonWebApp
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 # ======================================
 # ==== ТВОЙ ТОКЕН ======================
@@ -15,12 +15,11 @@ bot = telebot.TeleBot(TELEGRAM_TOKEN)
 conn = sqlite3.connect('users.db', check_same_thread=False)
 cursor = conn.cursor()
 
-# Создаём таблицу пользователей
+# Создаём таблицу пользователей (ТОЛЬКО user_id и balance)
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         user_id INTEGER PRIMARY KEY,
-        balance INTEGER DEFAULT 0,
-        username TEXT
+        balance INTEGER DEFAULT 0
     )
 ''')
 conn.commit()
@@ -57,8 +56,8 @@ def start(message):
     user_id = message.chat.id
     username = message.from_user.username or 'NoUsername'
     
-    # Добавляем пользователя в базу
-    cursor.execute("INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
+    # Добавляем пользователя в базу (ТОЛЬКО user_id)
+    cursor.execute("INSERT OR IGNORE INTO users (user_id) VALUES (?)", (user_id,))
     conn.commit()
     
     # Получаем баланс пользователя
