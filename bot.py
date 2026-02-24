@@ -1,72 +1,135 @@
-import telebot
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+import sqlite3
+import uvicorn
 
 # ======================================
-# ==== ТВОЙ ТОКЕН ======================
+# ==== СОЗДАЁМ СЕРВЕР ==================
 # ======================================
-TELEGRAM_TOKEN = '8451839561:AAGOa2BqD47DUwufli6kYYAWPjK_rHyIAck'
-bot = telebot.TeleBot(TELEGRAM_TOKEN)
+app = FastAPI()
+
+# Разрешаем запросы с твоего сайта
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://lololopanton.github.io"],  # Твой сайт
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # ======================================
-# ==== УСТАНОВКА КНОПКИ МЕНЮ ===========
+# ==== БАЗА ДАННЫХ =====================
 # ======================================
-def set_menu_button():
+conn = sqlite3.connect('balances.db', check_same_thread=False)
+cursor = conn.cursor()
+
+# Создаём таблицу для балансов пользователей
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS users (
+        user_id TEXT PRIMARY KEY,
+        balance INTEGER DEFAULT 0
+    )
+''')
+conn.commit()
+
+# ======================================
+# ==== ПОЛУЧИТЬ БАЛАНС =================
+# ======================================
+@app.get("/balance/{user_id}")
+def get_balance(user_id: str):
     try:
-        bot.set_chat_menu_button(
-            menu_button={
-                "type": "web_app",
-                "text": "🚀 Открыть",
-                "web_app": {
-                    "url": "https://lololopanton.github.io/webapp/"
-                }
-            }
-        )
-        print("✅ Кнопка меню установлена глобально")
+        cursor.execute("SELECT balance FROM users WHERE user_id=?", (user_id,))
+        result = cursor.fetchone()
+        
+        if result:
+            balance = result[0]
+        else:
+            # Если пользователя нет, создаём с 0
+            cursor.execute("INSERT INTO users (user_id, balance) VALUES (?, 0)", (user_id,))
+            conn.commit()
+            balance = 0
+        
+        return {
+            "user_id": user_id,
+            "balance": balance,
+            "status": "success"
+        }
     except Exception as e:
-        print(f"Ошибка установки кнопки: {e}")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 # ======================================
-# ==== КОМАНДА /START ==================
+# ==== ДОБАВИТЬ БАЛАНС =================
 # ======================================
-@bot.message_handler(commands=['start'])
-def start(message):
-    user_id = message.chat.id
-    username = message.from_user.username or 'NoUsername'
-    
-    # Создаём кнопку для Web App
-    markup = InlineKeyboardMarkup()
-    web_app_url = "https://lololopanton.github.io/webapp/"
-    
-    button = InlineKeyboardButton(
-        text="🚀 Открыть приложение",
-        web_app=WebAppInfo(url=web_app_url)
-    )
-    markup.add(button)
-    
-    # Отправляем сообщение
-    bot.send_message(
-        user_id, 
-        f"👋 Привет, @{username}!\n\n"
-        f"Нажми кнопку ниже, чтобы открыть приложение:",
-        reply_markup=markup
-    )
+@app.post("/balance/{user_id}/add/{amount}")
+def add_balance(user_id: str, amount: int):
+    try:
+        # Проверяем, есть ли пользователь
+        cursor.execute("SELECT balance FROM users WHERE user_id=?", (user_id,))
+        result = cursor.fetchone()
+        
+        if result:
+            # Обновляем баланс
+            new_balance = result[0] + amount
+            cursor.execute("UPDATE users SET balance = ? WHERE user_id=?", (new_balance, user_id))
+        else:
+            # Создаём нового пользователя
+            new_balance = amount
+            cursor.execute("INSERT INTO users (user_id, balance) VALUES (?, ?)", (user_id, new_balance))
+        
+        conn.commit()
+        
+        return {
+            "user_id": user_id,
+            "balance": new_balance,
+            "added": amount,
+            "status": "success"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 # ======================================
-# ==== ЗАПУСК БОТА =====================
+# ==== УСТАНОВИТЬ БАЛАНС ================
+# ======================================
+@app.post("/balance/{user_id}/set/{amount}")
+def set_balance(user_id: str, amount: int):
+    try:
+        cursor.execute("INSERT OR REPLACE INTO users (user_id, balance) VALUES (?, ?)", 
+                      (user_id, amount))
+        conn.commit()
+        
+        return {
+            "user_id": user_id,
+            "balance": amount,
+            "status": "success"
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e)
+        }
+
+# ======================================
+# ==== ПРОВЕРКА СЕРВЕРА =================
+# ======================================
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "message": "Balance server is running",
+        "endpoints": {
+            "get_balance": "/balance/{user_id}",
+            "add_balance": "/balance/{user_id}/add/{amount}",
+            "set_balance": "/balance/{user_id}/set/{amount}"
+        }
+    }
+
+# ======================================
+# ==== ЗАПУСК (для локального теста) ===
 # ======================================
 if __name__ == "__main__":
-    print("✅ Бот запущен (финальная версия)")
-    print("🌐 Web App: https://lololopanton.github.io/webapp/")
-    
-    # Устанавливаем кнопку меню
-    set_menu_button()
-    
-    # Бесконечный цикл с защитой от падений
-    import time
-    while True:
-        try:
-            bot.polling(none_stop=True, interval=0, timeout=20)
-        except Exception as e:
-            print(f"❌ Ошибка: {e}")
-            time.sleep(5)
-            print("🔄 Перезапуск...")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
