@@ -1,81 +1,610 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Bot</title>
-    <!-- Telegram (самая первая строка после head) -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crypto Bot | Web App</title>
+    
+    <!-- Telegram Web App SDK (всегда первым) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
     <style>
-        body {
+        /* ===== КРАСИВЫЙ ДИЗАЙН ===== */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
             margin: 0;
-            padding: 20px;
-            font-family: Arial;
-            background: #1a1a2e;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
             color: white;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-30px) translateX(-10px); }
+            75% { transform: translateY(-10px) translateX(20px); }
+        }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 80px;
+        }
+        
+        .header {
             text-align: center;
+            margin-bottom: 30px;
+            animation: slideDown 0.8s ease-out;
         }
-        .balance {
-            font-size: 50px;
-            margin: 30px;
-            padding: 20px;
-            background: #16213e;
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #ffd700, #ffb347);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 20px 40px rgba(255, 215, 0, 0.6); }
+            100% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
+        }
+        
+        .logo span {
+            font-size: 40px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(145deg, #fff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+        
+        .balance-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: scaleIn 0.6s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .balance-label {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+        }
+        
+        .balance-amount {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 5px;
+            transition: opacity 0.3s;
+        }
+        
+        .balance-usd {
+            font-size: 16px;
+            color: #ffd700;
+            font-weight: 600;
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .action-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
-        }
-        button {
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 18px;
-            background: #0f3460;
+            padding: 20px;
             color: white;
-            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            animation: fadeInUp 0.6s ease-out backwards;
+        }
+        
+        .action-button:nth-child(1) { animation-delay: 0.1s; }
+        .action-button:nth-child(2) { animation-delay: 0.2s; }
+        .action-button:nth-child(3) { animation-delay: 0.3s; }
+        .action-button:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .action-button:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ffd700;
+        }
+        
+        .action-button:active {
+            transform: translateY(0);
+        }
+        
+        .action-button .emoji {
+            font-size: 32px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .action-button.primary {
+            background: linear-gradient(145deg, #ffd700, #ffb347);
+            color: #333;
+            grid-column: span 2;
+        }
+        
+        .action-button.primary .emoji {
+            animation: none;
+        }
+        
+        .history-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            animation: slideUp 0.8s ease-out 0.5s both;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .history-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .history-header span {
+            color: #ffd700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            animation: fadeInRight 0.5s ease-out backwards;
+            transition: transform 0.2s;
+        }
+        
+        .history-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-item:nth-child(1) { animation-delay: 0.6s; }
+        .history-item:nth-child(2) { animation-delay: 0.7s; }
+        .history-item:nth-child(3) { animation-delay: 0.8s; }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .history-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .history-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 215, 0, 0.2);
             border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .history-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .history-title {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .history-date {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .history-amount {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        
+        .history-amount.positive {
+            color: #4caf50;
+        }
+        
+        .history-amount.negative {
+            color: #f44336;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            z-index: 10;
+            animation: slideUpNav 0.5s ease-out;
+        }
+        
+        @keyframes slideUpNav {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 12px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .nav-item.active {
+            color: #ffd700;
+        }
+        
+        .nav-item .nav-icon {
+            font-size: 24px;
+        }
+        
+        .nav-item:hover {
+            color: white;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 1000;
+            transition: opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 400px) {
+            .balance-amount {
+                font-size: 42px;
+            }
+            .action-button {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>💰 Crypto Bot</h1>
-    <div class="balance" id="balance">0</div>
-    <button onclick="add()">+100 тест</button>
-    <button onclick="refresh()">🔄 Обновить</button>
-
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span>💰</span>
+            </div>
+            <h1>Crypto Bot</h1>
+            <p id="greeting">Загрузка...</p>
+        </div>
+        
+        <div class="balance-card">
+            <div class="balance-label">Баланс</div>
+            <div class="balance-amount" id="balance">0</div>
+            <div class="balance-usd" id="usdBalance">$0 USD</div>
+        </div>
+        
+        <div class="buttons-grid">
+            <button class="action-button" onclick="deposit()">
+                <span class="emoji">📥</span> Пополнить
+            </button>
+            <button class="action-button" onclick="withdraw()">
+                <span class="emoji">📤</span> Вывести
+            </button>
+            <button class="action-button" onclick="sendMoney()">
+                <span class="emoji">✈️</span> Отправить
+            </button>
+            <button class="action-button" onclick="refreshBalance()">
+                <span class="emoji">🔄</span> Обновить
+            </button>
+            <button class="action-button primary" onclick="addTestMoney()">
+                <span class="emoji">➕</span> Тест +100
+            </button>
+        </div>
+        
+        <div class="history-section">
+            <div class="history-header">
+                <h3>📋 История операций</h3>
+                <span onclick="showAllHistory()">Все →</span>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+    
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="navigate('home')">
+            <span class="nav-icon">🏠</span> Главная
+        </div>
+        <div class="nav-item" onclick="navigate('stats')">
+            <span class="nav-icon">📊</span> Статистика
+        </div>
+        <div class="nav-item" onclick="navigate('profile')">
+            <span class="nav-icon">👤</span> Профиль
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
     <script>
-        // ========== ОБЯЗАТЕЛЬНО СРАЗУ ==========
+        // ===== ОБЯЗАТЕЛЬНАЯ ИНИЦИАЛИЗАЦИЯ =====
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
         }
         
-        // ========== ПОЛЬЗОВАТЕЛЬ ==========
-        let userId = 'guest';
+        // ===== ПОЛЬЗОВАТЕЛЬ =====
+        let userId = null;
+        let userName = 'Гость';
+        
         try {
             const user = Telegram.WebApp?.initDataUnsafe?.user;
             if (user) {
                 userId = user.id;
-                document.title = `User: ${userId}`;
+                userName = user.first_name || 'Пользователь';
+                document.getElementById('greeting').textContent = `Привет, ${userName}!`;
+            } else {
+                document.getElementById('greeting').textContent = 'Добро пожаловать!';
             }
         } catch (e) {}
         
-        // ========== БАЛАНС ==========
+        if (!userId) {
+            userId = 'guest_' + Date.now();
+        }
+        
+        // ===== БАЛАНС =====
         function getBalance() {
             return Number(localStorage.getItem('bal_' + userId)) || 0;
         }
         
         function setBalance(val) {
             localStorage.setItem('bal_' + userId, val);
-            document.getElementById('balance').innerText = val;
+            document.getElementById('balance').textContent = val;
+            document.getElementById('usdBalance').textContent = '$' + val + ' USD';
         }
         
-        function add() {
+        function showNotification(msg, type = 'info') {
+            const n = document.getElementById('notification');
+            n.textContent = msg;
+            n.style.opacity = '1';
+            n.style.background = type === 'success' ? '#4CAF50' : '#333';
+            setTimeout(() => n.style.opacity = '0', 2000);
+        }
+        
+        function addTestMoney() {
             setBalance(getBalance() + 100);
+            showNotification('+100 USDT', 'success');
         }
         
-        function refresh() {
-            document.getElementById('balance').innerText = getBalance();
+        function refreshBalance() {
+            setBalance(getBalance());
+            showNotification('Баланс обновлён', 'success');
         }
         
-        // Старт
+        function deposit() { showNotification('📥 Скоро'); }
+        function withdraw() { showNotification('📤 Скоро'); }
+        function sendMoney() { showNotification('✈️ Скоро'); }
+        function showAllHistory() { showNotification('📋 История скоро'); }
+        function navigate(page) { showNotification('🏠 Раздел: ' + page); }
+        
+        // ===== ЧАСТИЦЫ =====
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.width = (Math.random() * 10 + 5) + 'px';
+                p.style.height = p.style.width;
+                p.style.left = Math.random() * 100 + '%';
+                p.style.top = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 5 + 's';
+                p.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(p);
+            }
+        }
+        
+        // ===== ИСТОРИЯ =====
+        function updateHistory() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = `
+                <div class="history-item">
+                    <div class="history-item-left">
+                        <div class="history-icon">📥</div>
+                        <div class="history-info">
+                            <div class="history-title">Пополнение</div>
+                            <div class="history-date">Только что</div>
+                        </div>
+                    </div>
+                    <div class="history-amount positive">+100 USDT</div>
+                </div>
+                <div class="history-item">
+                    <div class="history-item-left">
+                        <div class="history-icon">📤</div>
+                        <div class="history-info">
+                            <div class="history-title">Вывод</div>
+                            <div class="history-date">2 часа назад</div>
+                        </div>
+                    </div>
+                    <div class="history-amount negative">-50 USDT</div>
+                </div>
+            `;
+        }
+        
+        // ===== СТАРТ =====
+        createParticles();
         setBalance(getBalance());
+        updateHistory();
     </script>
 </body>
 </html>
