@@ -1,266 +1,81 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crypto Bot | Web App</title>
-    
-    <!-- Telegram Web App SDK (обязательно и ПЕРВЫМ) -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Bot</title>
+    <!-- Telegram (самая первая строка после head) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            color: white;
+            margin: 0;
             padding: 20px;
-        }
-        
-        .container {
-            max-width: 450px;
-            margin: 0 auto;
-        }
-        
-        .header {
+            font-family: Arial;
+            background: #1a1a2e;
+            color: white;
             text-align: center;
-            margin-bottom: 30px;
-            padding-top: 20px;
         }
-        
-        .header h1 {
-            font-size: 32px;
-            margin-bottom: 5px;
-        }
-        
-        .balance-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+        .balance {
+            font-size: 50px;
+            margin: 30px;
+            padding: 20px;
+            background: #16213e;
             border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        
-        .balance-label {
-            font-size: 14px;
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-        
-        .balance-amount {
-            font-size: 48px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .button {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            color: white;
+        button {
+            padding: 15px 30px;
+            margin: 10px;
             font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-            text-align: center;
-        }
-        
-        .button:active {
-            transform: scale(0.95);
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .button.primary {
-            background: #ffd700;
-            color: #333;
-            grid-column: span 2;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: #0f3460;
             color: white;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-size: 14px;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
+            border: none;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="mainContent">
-        <div class="header">
-            <h1>💰 Crypto Bot</h1>
-            <p id="greeting">Загрузка...</p>
-        </div>
-        
-        <div class="balance-card">
-            <div class="balance-label">Твой баланс</div>
-            <div class="balance-amount" id="balance">0</div>
-        </div>
-        
-        <div class="buttons">
-            <button class="button" onclick="deposit()">📥 Пополнить</button>
-            <button class="button" onclick="withdraw()">📤 Вывести</button>
-            <button class="button" onclick="refreshBalance()">🔄 Обновить</button>
-            <button class="button" onclick="sendMoney()">✈️ Отправить</button>
-            <button class="button primary" onclick="addTestMoney()">➕ Добавить 100 (тест)</button>
-        </div>
-    </div>
-    
-    <div class="notification" id="notification"></div>
-    
+    <h1>💰 Crypto Bot</h1>
+    <div class="balance" id="balance">0</div>
+    <button onclick="add()">+100 тест</button>
+    <button onclick="refresh()">🔄 Обновить</button>
+
     <script>
-        // ======================================
-        // ==== ОБЯЗАТЕЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ======
-        // ======================================
-        
-        // Сообщаем Telegram, что приложение готово
+        // ========== ОБЯЗАТЕЛЬНО СРАЗУ ==========
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
-            Telegram.WebApp.expand(); // Растянуть на весь экран
-            
-            // Отключаем вертикальную кнопку (она не нужна)
-            Telegram.WebApp.MainButton.hide();
-            
-            console.log('✅ Telegram Web App инициализирован');
-        } else {
-            console.warn('⚠️ Telegram Web App не доступен');
+            Telegram.WebApp.expand();
         }
         
-        // ======================================
-        // ==== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ====
-        // ======================================
-        
-        let userId = null;
-        let userName = 'Гость';
-        
+        // ========== ПОЛЬЗОВАТЕЛЬ ==========
+        let userId = 'guest';
         try {
-            if (window.Telegram && Telegram.WebApp) {
-                const user = Telegram.WebApp.initDataUnsafe?.user;
-                
-                if (user) {
-                    userId = user.id;
-                    userName = user.first_name || 'Пользователь';
-                    console.log('✅ Пользователь:', userId, userName);
-                    
-                    document.getElementById('greeting').textContent = `Привет, ${userName}!`;
-                } else {
-                    console.log('⚠️ Данные пользователя не получены');
-                    document.getElementById('greeting').textContent = 'Добро пожаловать!';
-                }
+            const user = Telegram.WebApp?.initDataUnsafe?.user;
+            if (user) {
+                userId = user.id;
+                document.title = `User: ${userId}`;
             }
-        } catch (e) {
-            console.error('❌ Ошибка получения пользователя:', e);
-        }
+        } catch (e) {}
         
-        // Создаём временный ID, если нет настоящего
-        if (!userId) {
-            userId = 'guest_' + Date.now();
-            console.log('🔄 Тестовый ID:', userId);
-        }
-        
-        // ======================================
-        // ==== РАБОТА С БАЛАНСОМ ================
-        // ======================================
-        
+        // ========== БАЛАНС ==========
         function getBalance() {
-            const key = `balance_${userId}`;
-            return parseFloat(localStorage.getItem(key)) || 0;
+            return Number(localStorage.getItem('bal_' + userId)) || 0;
         }
         
-        function setBalance(amount) {
-            const key = `balance_${userId}`;
-            localStorage.setItem(key, amount);
-            document.getElementById('balance').textContent = amount;
+        function setBalance(val) {
+            localStorage.setItem('bal_' + userId, val);
+            document.getElementById('balance').innerText = val;
         }
         
-        function showBalance() {
-            document.getElementById('balance').textContent = getBalance();
+        function add() {
+            setBalance(getBalance() + 100);
         }
         
-        // ======================================
-        // ==== ФУНКЦИИ КНОПОК ==================
-        // ======================================
-        
-        function showNotification(msg, type = 'info') {
-            const notif = document.getElementById('notification');
-            notif.textContent = msg;
-            notif.style.opacity = '1';
-            notif.style.backgroundColor = type === 'success' ? '#4CAF50' : '#333';
-            
-            setTimeout(() => {
-                notif.style.opacity = '0';
-            }, 2000);
+        function refresh() {
+            document.getElementById('balance').innerText = getBalance();
         }
         
-        function addTestMoney() {
-            const current = getBalance();
-            setBalance(current + 100);
-            showNotification('+100 USDT (тест)', 'success');
-        }
-        
-        function refreshBalance() {
-            showBalance();
-            showNotification('Баланс обновлён', 'success');
-        }
-        
-        function deposit() {
-            showNotification('📥 Пополнение скоро', 'info');
-        }
-        
-        function withdraw() {
-            showNotification('📤 Вывод скоро', 'info');
-        }
-        
-        function sendMoney() {
-            showNotification('✈️ Отправка скоро', 'info');
-        }
-        
-        // ======================================
-        // ==== ЗАПУСК ==========================
-        // ======================================
-        
-        // Показываем баланс
-        showBalance();
-        
-        // Отправляем сигнал Telegram, что всё загружено
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.onEvent('viewportChanged', function() {
-                console.log('✅ Viewport изменился');
-            });
-        }
-        
-        console.log('✅ Сайт полностью загружен');
+        // Старт
+        setBalance(getBalance());
     </script>
 </body>
 </html>
