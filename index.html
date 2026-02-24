@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crypto Bot | Web App</title>
     
-    <!-- Telegram Web App SDK -->
+    <!-- Telegram Web App SDK (обязательно) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
@@ -18,489 +16,80 @@
         }
         
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             min-height: 100vh;
             color: white;
-            position: relative;
-            overflow-x: hidden;
-        }
-        
-        .particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-        
-        .particle {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 8s infinite ease-in-out;
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0); }
-            25% { transform: translateY(-20px) translateX(10px); }
-            50% { transform: translateY(-30px) translateX(-10px); }
-            75% { transform: translateY(-10px) translateX(20px); }
+            padding: 20px;
         }
         
         .container {
-            position: relative;
-            z-index: 1;
             max-width: 450px;
             margin: 0 auto;
-            padding: 20px;
-            padding-bottom: 80px;
         }
         
         .header {
             text-align: center;
             margin-bottom: 30px;
-            animation: slideDown 0.8s ease-out;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(145deg, #ffd700, #ffb347);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
-            50% { box-shadow: 0 20px 40px rgba(255, 215, 0, 0.6); }
-            100% { box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3); }
-        }
-        
-        .logo span {
-            font-size: 40px;
         }
         
         .header h1 {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(145deg, #fff, #ffd700);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 32px;
             margin-bottom: 5px;
-        }
-        
-        .header p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
         }
         
         .balance-card {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 30px;
+            border-radius: 20px;
             padding: 25px;
             margin-bottom: 25px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-            animation: scaleIn 0.6s ease-out 0.2s both;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .balance-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 10s linear infinite;
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes scaleIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .balance-label {
             font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 10px;
+            opacity: 0.8;
+            margin-bottom: 5px;
         }
         
         .balance-amount {
-            font-size: 56px;
-            font-weight: 800;
-            line-height: 1;
-            margin-bottom: 5px;
-            transition: opacity 0.3s;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
         }
         
-        .balance-usd {
-            font-size: 16px;
-            color: #ffd700;
-            font-weight: 600;
-        }
-        
-        .buttons-grid {
+        .buttons {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
         
-        .action-button {
+        .button {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
+            border-radius: 15px;
             padding: 20px;
             color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            animation: fadeInUp 0.6s ease-out backwards;
-        }
-        
-        .action-button:nth-child(1) { animation-delay: 0.1s; }
-        .action-button:nth-child(2) { animation-delay: 0.2s; }
-        .action-button:nth-child(3) { animation-delay: 0.3s; }
-        .action-button:nth-child(4) { animation-delay: 0.4s; }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .action-button:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #ffd700;
-        }
-        
-        .action-button:active {
-            transform: translateY(0);
-        }
-        
-        .action-button .emoji {
-            font-size: 32px;
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .action-button.primary {
-            background: linear-gradient(145deg, #ffd700, #ffb347);
-            color: #333;
-            grid-column: span 2;
-        }
-        
-        .action-button.primary .emoji {
-            animation: none;
-        }
-        
-        .history-section {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 20px;
-            animation: slideUp 0.8s ease-out 0.5s both;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .history-header h3 {
             font-size: 18px;
             font-weight: 600;
-        }
-        
-        .history-header span {
-            color: #ffd700;
-            font-size: 14px;
             cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
         }
         
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .button:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
         }
         
-        .history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            animation: fadeInRight 0.5s ease-out backwards;
-            transition: transform 0.2s;
-        }
-        
-        .history-item:hover {
-            transform: translateX(5px);
-            background: rgba(255, 255, 255, 0.1);
-        }
-        
-        .history-item:nth-child(1) { animation-delay: 0.6s; }
-        .history-item:nth-child(2) { animation-delay: 0.7s; }
-        .history-item:nth-child(3) { animation-delay: 0.8s; }
-        
-        @keyframes fadeInRight {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .history-item-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .history-icon {
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 215, 0, 0.2);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .history-info {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .history-title {
-            font-weight: 600;
-            font-size: 14px;
-        }
-        
-        .history-date {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-        
-        .history-amount {
-            font-weight: 700;
-            font-size: 16px;
-        }
-        
-        .history-amount.positive {
-            color: #4caf50;
-        }
-        
-        .history-amount.negative {
-            color: #f44336;
-        }
-        
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            z-index: 10;
-            animation: slideUpNav 0.5s ease-out;
-        }
-        
-        @keyframes slideUpNav {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .nav-item.active {
-            color: #ffd700;
-        }
-        
-        .nav-item .nav-icon {
-            font-size: 24px;
-        }
-        
-        .nav-item:hover {
-            color: white;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .modal-content {
-            background: linear-gradient(135deg, #1e1b4b, #312e81);
-            border-radius: 30px;
-            padding: 25px;
-            width: 90%;
-            max-width: 350px;
-            position: relative;
-            animation: slideInModal 0.3s;
-        }
-        
-        @keyframes slideInModal {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            color: rgba(255, 255, 255, 0.5);
-            transition: color 0.3s;
-        }
-        
-        .modal-close:hover {
-            color: white;
-        }
-        
-        .modal h2 {
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        
-        .modal-input {
-            width: 100%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        
-        .modal-input:focus {
-            outline: none;
-            border-color: #ffd700;
-        }
-        
-        .modal-button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(145deg, #ffd700, #ffb347);
-            border: none;
-            border-radius: 15px;
+        .button.primary {
+            background: #ffd700;
             color: #333;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .modal-button:active {
-            transform: scale(0.98);
+            grid-column: span 2;
         }
         
         .notification {
@@ -509,127 +98,35 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
             color: white;
             padding: 12px 25px;
             border-radius: 50px;
             font-size: 14px;
             z-index: 1000;
-            animation: slideDownNotif 0.3s forwards;
+            transition: 0.3s;
+            opacity: 0;
             pointer-events: none;
-        }
-        
-        @keyframes slideDownNotif {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -100%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, 0);
-            }
-        }
-        
-        @media (max-width: 400px) {
-            .balance-amount {
-                font-size: 42px;
-            }
-            .action-button {
-                padding: 15px;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
     <div class="container">
         <div class="header">
-            <div class="logo">
-                <span>💰</span>
-            </div>
-            <h1>Crypto Bot</h1>
-            <p>Ваш надежный крипто-кошелек</p>
+            <h1>💰 Crypto Bot</h1>
+            <p id="greeting">Загрузка...</p>
         </div>
         
         <div class="balance-card">
-            <div class="balance-label">Баланс</div>
+            <div class="balance-label">Твой баланс</div>
             <div class="balance-amount" id="balance">0</div>
-            <div class="balance-usd" id="usdBalance">$0 USD</div>
         </div>
         
-        <div class="buttons-grid">
-            <button class="action-button" onclick="showDepositModal()">
-                <span class="emoji">📥</span> Пополнить
-            </button>
-            <button class="action-button" onclick="showWithdrawModal()">
-                <span class="emoji">📤</span> Вывести
-            </button>
-            <button class="action-button" onclick="showSendModal()">
-                <span class="emoji">✈️</span> Отправить
-            </button>
-            <button class="action-button" onclick="requestBalance()">
-                <span class="emoji">🔄</span> Обновить
-            </button>
-            <button class="action-button primary" onclick="showGame()">
-                <span class="emoji">🎮</span> Играть и зарабатывать
-            </button>
-        </div>
-        
-        <div class="history-section">
-            <div class="history-header">
-                <h3>📋 История операций</h3>
-                <span onclick="showAllHistory()">Все →</span>
-            </div>
-            <div class="history-list" id="historyList"></div>
-        </div>
-    </div>
-    
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="navigate('home')">
-            <span class="nav-icon">🏠</span> Главная
-        </div>
-        <div class="nav-item" onclick="navigate('stats')">
-            <span class="nav-icon">📊</span> Статистика
-        </div>
-        <div class="nav-item" onclick="navigate('referrals')">
-            <span class="nav-icon">👥</span> Рефералы
-        </div>
-        <div class="nav-item" onclick="navigate('profile')">
-            <span class="nav-icon">👤</span> Профиль
-        </div>
-    </div>
-    
-    <div class="modal" id="depositModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('depositModal')">&times;</span>
-            <h2>📥 Пополнение</h2>
-            <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">Адрес для пополнения:</p>
-            <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px; word-break: break-all;">
-                <code>TTestAddress123456789</code>
-            </div>
-            <p style="font-size: 14px; color: rgba(255,255,255,0.5);">После отправки нажмите /check в боте</p>
-            <button class="modal-button" onclick="copyAddress()">📋 Копировать адрес</button>
-        </div>
-    </div>
-    
-    <div class="modal" id="withdrawModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('withdrawModal')">&times;</span>
-            <h2>📤 Вывод средств</h2>
-            <input type="number" class="modal-input" id="withdrawAmount" placeholder="Сумма в USDT">
-            <input type="text" class="modal-input" id="withdrawAddress" placeholder="Адрес кошелька">
-            <button class="modal-button" onclick="processWithdraw()">Вывести</button>
-        </div>
-    </div>
-    
-    <div class="modal" id="sendModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal('sendModal')">&times;</span>
-            <h2>✈️ Отправить</h2>
-            <input type="number" class="modal-input" id="sendAmount" placeholder="Сумма в USDT">
-            <input type="text" class="modal-input" id="sendAddress" placeholder="Адрес получателя">
-            <button class="modal-button" onclick="processSend()">Отправить</button>
+        <div class="buttons">
+            <button class="button" onclick="deposit()">📥 Пополнить</button>
+            <button class="button" onclick="withdraw()">📤 Вывести</button>
+            <button class="button" onclick="refreshBalance()">🔄 Обновить</button>
+            <button class="button" onclick="sendMoney()">✈️ Отправить</button>
+            <button class="button primary" onclick="addTestMoney()">➕ Добавить 100 (тест)</button>
         </div>
     </div>
     
@@ -637,309 +134,107 @@
     
     <script>
         // ======================================
-        // ==== ИНИЦИАЛИЗАЦИЯ TELEGRAM WEB APP ==
+        // ==== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ====
         // ======================================
         let userId = null;
-        let userName = '';
-        let currentBalance = 0;
+        let userName = 'Гость';
         
-        // Проверяем, что Telegram Web App загружен
-        if (window.Telegram && Telegram.WebApp) {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand();
+        // Функция показа уведомлений
+        function showNotification(msg, type = 'info') {
+            const notif = document.getElementById('notification');
+            notif.textContent = msg;
+            notif.style.opacity = '1';
+            notif.style.backgroundColor = type === 'success' ? '#4CAF50' : '#333';
             
-            const user = Telegram.WebApp.initDataUnsafe?.user;
-            if (user) {
-                userId = user.id;
-                userName = user.first_name || 'Пользователь';
-                console.log('Пользователь:', userId, userName);
-                
-                const headerP = document.querySelector('.header p');
-                if (headerP) {
-                    headerP.textContent = `Привет, ${userName}!`;
-                }
-            }
-            
-            Telegram.WebApp.MainButton.setText('ЗАКРЫТЬ').hide();
-        } else {
-            console.warn('Telegram Web App не доступен');
-        }
-        
-        // ======================================
-        // ==== ПОЛУЧЕНИЕ БАЛАНСА ИЗ URL ========
-        // ======================================
-        function getBalanceFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const balance = urlParams.get('balance');
-            return balance ? parseFloat(balance) : 0;
-        }
-        
-        // ======================================
-        // ==== ОТПРАВКА ДАННЫХ БОТУ ============
-        // ======================================
-        function sendToBot(action, data) {
-            if (!window.Telegram || !Telegram.WebApp) {
-                alert('Ошибка: Telegram Web App не доступен');
-                return;
-            }
-            
-            try {
-                const message = {
-                    action: action,
-                    userId: userId,
-                    ...data
-                };
-                
-                Telegram.WebApp.sendData(JSON.stringify(message));
-                console.log('Отправлено:', message);
-                
-                showNotification('Запрос отправлен!', 'success');
-                
-            } catch (e) {
-                console.error('Ошибка отправки:', e);
-                alert('Ошибка отправки');
-            }
-        }
-        
-        // ======================================
-        // ==== ОБНОВЛЕНИЕ БАЛАНСА НА ЭКРАНЕ ====
-        // ======================================
-        function updateBalanceDisplay(balance) {
-            const balanceElement = document.getElementById('balance');
-            const usdElement = document.getElementById('usdBalance');
-            
-            if (balanceElement) {
-                balanceElement.textContent = balance;
-                balanceElement.style.opacity = '1';
-            }
-            if (usdElement) {
-                usdElement.textContent = `$${balance} USD`;
-            }
-            currentBalance = balance;
-        }
-        
-        // ======================================
-        // ==== ЗАПРОС БАЛАНСА У БОТА ===========
-        // ======================================
-        function requestBalance() {
-            const balanceElement = document.getElementById('balance');
-            if (balanceElement) {
-                balanceElement.style.opacity = '0.5';
-            }
-            
-            sendToBot('get_balance', {});
-            
-            // Ждём 2 секунды и возвращаем прозрачность
             setTimeout(() => {
-                if (balanceElement) {
-                    balanceElement.style.opacity = '1';
-                }
+                notif.style.opacity = '0';
             }, 2000);
         }
         
-        // ======================================
-        // ==== СЛУШАЕМ СООБЩЕНИЯ ОТ БОТА =======
-        // ======================================
-        // Telegram Web App может получать сообщения?
-        // К сожалению, прямой связи нет.
-        // Бот отвечает в чат, а Web App не видит ответа.
-        
-        // Поэтому мы используем баланс из URL при открытии
-        const urlBalance = getBalanceFromUrl();
-        if (urlBalance > 0) {
-            updateBalanceDisplay(urlBalance);
-        } else {
-            // Если в URL нет баланса, запрашиваем у бота
-            requestBalance();
-        }
-        
-        // ======================================
-        // ==== ОБНОВЛЕНИЕ ИСТОРИИ ==============
-        // ======================================
-        function updateHistory() {
-            const historyList = document.getElementById('historyList');
-            if (!historyList) return;
-            
-            const operations = [
-                { type: 'deposit', amount: 100, date: 'Только что', icon: '📥', title: 'Пополнение' },
-                { type: 'withdraw', amount: -50, date: '2 часа назад', icon: '📤', title: 'Вывод' },
-                { type: 'send', amount: -10, date: 'Вчера', icon: '✈️', title: 'Отправка' }
-            ];
-            
-            let html = '';
-            operations.forEach((op, index) => {
-                const amountClass = op.amount > 0 ? 'positive' : 'negative';
-                const amountSign = op.amount > 0 ? '+' : '';
+        // Пытаемся получить данные из Telegram
+        try {
+            if (window.Telegram && Telegram.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
                 
-                html += `
-                    <div class="history-item" style="animation-delay: ${0.6 + index * 0.1}s">
-                        <div class="history-item-left">
-                            <div class="history-icon">${op.icon}</div>
-                            <div class="history-info">
-                                <div class="history-title">${op.title}</div>
-                                <div class="history-date">${op.date}</div>
-                            </div>
-                        </div>
-                        <div class="history-amount ${amountClass}">
-                            ${amountSign}${op.amount} USDT
-                        </div>
-                    </div>
-                `;
-            });
-            
-            historyList.innerHTML = html;
-        }
-        
-        // ======================================
-        // ==== ЧАСТИЦЫ ФОНА ====================
-        // ======================================
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            if (!particlesContainer) return;
-            
-            for (let i = 0; i < 20; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                const size = Math.random() * 10 + 5;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 5 + 's';
-                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
-                particlesContainer.appendChild(particle);
+                const user = Telegram.WebApp.initDataUnsafe?.user;
+                
+                if (user) {
+                    userId = user.id;
+                    userName = user.first_name || 'Пользователь';
+                    console.log('✅ Telegram пользователь:', userId, userName);
+                    
+                    document.getElementById('greeting').textContent = `Привет, ${userName}!`;
+                } else {
+                    console.log('⚠️ Telegram данные не получены');
+                    document.getElementById('greeting').textContent = 'Добро пожаловать!';
+                }
+            } else {
+                console.log('❌ Telegram Web App не доступен');
+                document.getElementById('greeting').textContent = 'Тестовый режим';
             }
+        } catch (e) {
+            console.error('Ошибка Telegram:', e);
+        }
+        
+        // Если нет userId, создаём временный для теста
+        if (!userId) {
+            userId = 'guest_' + Date.now();
+            console.log('🔄 Тестовый ID:', userId);
         }
         
         // ======================================
-        // ==== УВЕДОМЛЕНИЯ =====================
+        // ==== РАБОТА С БАЛАНСОМ ================
         // ======================================
-        function showNotification(message, type = 'info') {
-            const notification = document.getElementById('notification');
-            if (!notification) return;
-            
-            notification.textContent = message;
-            notification.style.opacity = '1';
-            notification.style.backgroundColor = type === 'success' ? 'rgba(76, 175, 80, 0.9)' : 'rgba(0, 0, 0, 0.8)';
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-            }, 3000);
+        
+        // Получить баланс
+        function getBalance() {
+            const key = `balance_${userId}`;
+            return parseFloat(localStorage.getItem(key)) || 0;
         }
         
-        // ======================================
-        // ==== МОДАЛЬНЫЕ ОКНА ==================
-        // ======================================
-        function showDepositModal() {
-            document.getElementById('depositModal').style.display = 'flex';
+        // Установить баланс
+        function setBalance(amount) {
+            const key = `balance_${userId}`;
+            localStorage.setItem(key, amount);
+            document.getElementById('balance').textContent = amount;
         }
         
-        function showWithdrawModal() {
-            document.getElementById('withdrawModal').style.display = 'flex';
+        // Показать баланс
+        function showBalance() {
+            document.getElementById('balance').textContent = getBalance();
         }
         
-        function showSendModal() {
-            document.getElementById('sendModal').style.display = 'flex';
+        // Добавить тестовые деньги
+        function addTestMoney() {
+            const current = getBalance();
+            setBalance(current + 100);
+            showNotification('+100 USDT (тест)', 'success');
         }
         
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
+        // Обновить баланс
+        function refreshBalance() {
+            showBalance();
+            showNotification('Баланс обновлён', 'success');
         }
         
-        // ======================================
-        // ==== КОПИРОВАНИЕ АДРЕСА ==============
-        // ======================================
-        function copyAddress() {
-            const address = 'TTestAddress123456789';
-            navigator.clipboard.writeText(address).then(() => {
-                showNotification('Адрес скопирован!', 'success');
-            }).catch(() => {
-                showNotification('Ошибка копирования', 'error');
-            });
+        // Пополнить
+        function deposit() {
+            showNotification('📥 Функция пополнения скоро появится', 'info');
         }
         
-        // ======================================
-        // ==== ОБРАБОТКА ВЫВОДА ================
-        // ======================================
-        function processWithdraw() {
-            const amount = document.getElementById('withdrawAmount')?.value;
-            const address = document.getElementById('withdrawAddress')?.value;
-            
-            if (!amount || !address) {
-                showNotification('Заполните все поля');
-                return;
-            }
-            
-            sendToBot('withdraw', { amount: amount, address: address });
-            closeModal('withdrawModal');
-            
-            document.getElementById('withdrawAmount').value = '';
-            document.getElementById('withdrawAddress').value = '';
+        // Вывести
+        function withdraw() {
+            showNotification('📤 Функция вывода скоро появится', 'info');
         }
         
-        // ======================================
-        // ==== ОБРАБОТКА ОТПРАВКИ ==============
-        // ======================================
-        function processSend() {
-            const amount = document.getElementById('sendAmount')?.value;
-            const address = document.getElementById('sendAddress')?.value;
-            
-            if (!amount || !address) {
-                showNotification('Заполните все поля');
-                return;
-            }
-            
-            sendToBot('send', { amount: amount, address: address });
-            closeModal('sendModal');
-            
-            document.getElementById('sendAmount').value = '';
-            document.getElementById('sendAddress').value = '';
+        // Отправить
+        function sendMoney() {
+            showNotification('✈️ Функция отправки скоро появится', 'info');
         }
         
-        // ======================================
-        // ==== ИГРА (ЗАГЛУШКА) =================
-        // ======================================
-        function showGame() {
-            showNotification('🎮 Игры скоро появятся!', 'info');
-        }
-        
-        // ======================================
-        // ==== НАВИГАЦИЯ =======================
-        // ======================================
-        function navigate(page) {
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => item.classList.remove('active'));
-            
-            event.target.closest('.nav-item').classList.add('active');
-            
-            const messages = {
-                home: '🏠 Главная',
-                stats: '📊 Статистика скоро',
-                referrals: '👥 Реферальная система скоро',
-                profile: '👤 Профиль скоро'
-            };
-            
-            showNotification(messages[page], 'info');
-        }
-        
-        // ======================================
-        // ==== ВСЯ ИСТОРИЯ =====================
-        // ======================================
-        function showAllHistory() {
-            showNotification('📋 Вся история в разработке', 'info');
-        }
-        
-        // ======================================
-        // ==== ИНИЦИАЛИЗАЦИЯ ===================
-        // ======================================
-        createParticles();
-        updateHistory();
-        
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        };
+        // Инициализация
+        showBalance();
     </script>
 </body>
 </html>
