@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Crypto Bot | Web App</title>
     
-    <!-- Telegram Web App SDK (обязательно) -->
+    <!-- Telegram Web App SDK (обязательно и ПЕРВЫМ) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <style>
@@ -31,6 +31,7 @@
         .header {
             text-align: center;
             margin-bottom: 30px;
+            padding-top: 20px;
         }
         
         .header h1 {
@@ -103,14 +104,20 @@
             border-radius: 50px;
             font-size: 14px;
             z-index: 1000;
-            transition: 0.3s;
             opacity: 0;
             pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="mainContent">
         <div class="header">
             <h1>💰 Crypto Bot</h1>
             <p id="greeting">Загрузка...</p>
@@ -134,12 +141,77 @@
     
     <script>
         // ======================================
+        // ==== ОБЯЗАТЕЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ======
+        // ======================================
+        
+        // Сообщаем Telegram, что приложение готово
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand(); // Растянуть на весь экран
+            
+            // Отключаем вертикальную кнопку (она не нужна)
+            Telegram.WebApp.MainButton.hide();
+            
+            console.log('✅ Telegram Web App инициализирован');
+        } else {
+            console.warn('⚠️ Telegram Web App не доступен');
+        }
+        
+        // ======================================
         // ==== ПОЛУЧЕНИЕ ДАННЫХ ПОЛЬЗОВАТЕЛЯ ====
         // ======================================
+        
         let userId = null;
         let userName = 'Гость';
         
-        // Функция показа уведомлений
+        try {
+            if (window.Telegram && Telegram.WebApp) {
+                const user = Telegram.WebApp.initDataUnsafe?.user;
+                
+                if (user) {
+                    userId = user.id;
+                    userName = user.first_name || 'Пользователь';
+                    console.log('✅ Пользователь:', userId, userName);
+                    
+                    document.getElementById('greeting').textContent = `Привет, ${userName}!`;
+                } else {
+                    console.log('⚠️ Данные пользователя не получены');
+                    document.getElementById('greeting').textContent = 'Добро пожаловать!';
+                }
+            }
+        } catch (e) {
+            console.error('❌ Ошибка получения пользователя:', e);
+        }
+        
+        // Создаём временный ID, если нет настоящего
+        if (!userId) {
+            userId = 'guest_' + Date.now();
+            console.log('🔄 Тестовый ID:', userId);
+        }
+        
+        // ======================================
+        // ==== РАБОТА С БАЛАНСОМ ================
+        // ======================================
+        
+        function getBalance() {
+            const key = `balance_${userId}`;
+            return parseFloat(localStorage.getItem(key)) || 0;
+        }
+        
+        function setBalance(amount) {
+            const key = `balance_${userId}`;
+            localStorage.setItem(key, amount);
+            document.getElementById('balance').textContent = amount;
+        }
+        
+        function showBalance() {
+            document.getElementById('balance').textContent = getBalance();
+        }
+        
+        // ======================================
+        // ==== ФУНКЦИИ КНОПОК ==================
+        // ======================================
+        
         function showNotification(msg, type = 'info') {
             const notif = document.getElementById('notification');
             notif.textContent = msg;
@@ -151,90 +223,44 @@
             }, 2000);
         }
         
-        // Пытаемся получить данные из Telegram
-        try {
-            if (window.Telegram && Telegram.WebApp) {
-                Telegram.WebApp.ready();
-                Telegram.WebApp.expand();
-                
-                const user = Telegram.WebApp.initDataUnsafe?.user;
-                
-                if (user) {
-                    userId = user.id;
-                    userName = user.first_name || 'Пользователь';
-                    console.log('✅ Telegram пользователь:', userId, userName);
-                    
-                    document.getElementById('greeting').textContent = `Привет, ${userName}!`;
-                } else {
-                    console.log('⚠️ Telegram данные не получены');
-                    document.getElementById('greeting').textContent = 'Добро пожаловать!';
-                }
-            } else {
-                console.log('❌ Telegram Web App не доступен');
-                document.getElementById('greeting').textContent = 'Тестовый режим';
-            }
-        } catch (e) {
-            console.error('Ошибка Telegram:', e);
-        }
-        
-        // Если нет userId, создаём временный для теста
-        if (!userId) {
-            userId = 'guest_' + Date.now();
-            console.log('🔄 Тестовый ID:', userId);
-        }
-        
-        // ======================================
-        // ==== РАБОТА С БАЛАНСОМ ================
-        // ======================================
-        
-        // Получить баланс
-        function getBalance() {
-            const key = `balance_${userId}`;
-            return parseFloat(localStorage.getItem(key)) || 0;
-        }
-        
-        // Установить баланс
-        function setBalance(amount) {
-            const key = `balance_${userId}`;
-            localStorage.setItem(key, amount);
-            document.getElementById('balance').textContent = amount;
-        }
-        
-        // Показать баланс
-        function showBalance() {
-            document.getElementById('balance').textContent = getBalance();
-        }
-        
-        // Добавить тестовые деньги
         function addTestMoney() {
             const current = getBalance();
             setBalance(current + 100);
             showNotification('+100 USDT (тест)', 'success');
         }
         
-        // Обновить баланс
         function refreshBalance() {
             showBalance();
             showNotification('Баланс обновлён', 'success');
         }
         
-        // Пополнить
         function deposit() {
-            showNotification('📥 Функция пополнения скоро появится', 'info');
+            showNotification('📥 Пополнение скоро', 'info');
         }
         
-        // Вывести
         function withdraw() {
-            showNotification('📤 Функция вывода скоро появится', 'info');
+            showNotification('📤 Вывод скоро', 'info');
         }
         
-        // Отправить
         function sendMoney() {
-            showNotification('✈️ Функция отправки скоро появится', 'info');
+            showNotification('✈️ Отправка скоро', 'info');
         }
         
-        // Инициализация
+        // ======================================
+        // ==== ЗАПУСК ==========================
+        // ======================================
+        
+        // Показываем баланс
         showBalance();
+        
+        // Отправляем сигнал Telegram, что всё загружено
+        if (window.Telegram && Telegram.WebApp) {
+            Telegram.WebApp.onEvent('viewportChanged', function() {
+                console.log('✅ Viewport изменился');
+            });
+        }
+        
+        console.log('✅ Сайт полностью загружен');
     </script>
 </body>
 </html>
