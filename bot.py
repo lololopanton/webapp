@@ -34,4 +34,14 @@ def start(message):
 # ======================================
 if __name__ == "__main__":
     print("✅ Бот запущен")
-    bot.polling(none_stop=True)
+    print("🌐 Сайт: https://lololopanton.github.io/webapp/")
+    
+    # Бесконечный цикл с защитой от ошибок
+    import time
+    while True:
+        try:
+            bot.polling(none_stop=True, interval=0, timeout=20)
+        except Exception as e:
+            print(f"❌ Ошибка: {e}")
+            time.sleep(5)
+            print("🔄 Перезапуск...")
